@@ -2,12 +2,13 @@ import { useState, useEffect } from "react";
 import "./App.css";
 import Timepicker from "./TimeField";
 import TimeMeasurementSelect from "./TimeMeasurementSelect";
-
+import Options from "./OptionsComponent/Options";
 function App() {
   const [fromTime, setFromTime] = useState();
   const [toTime, setToTime] = useState();
   const [differenceInTime, setDifferenceInTime] = useState();
   const [timeMeasurement, setTimeMeasurement] = useState("days");
+  const [takeEndDate, setTakeEndDate] = useState(false);
   const timeMeasurementMultiplier = {
     seconds: 1000 * 60,
     hours: 1000 * 60 * 60,
@@ -16,21 +17,27 @@ function App() {
     months: 1000 * 60 * 60 * 24 * 30,
     Years: 1000 * 60 * 60 * 24 * 365,
   };
+
+  const oneDayTimeInSeconds = 86400000;
   useEffect(() => {
     getTimeDifference();
   });
+
+  
+
 
   function getTimeDifference() {
     if (fromTime && toTime) {
       let fromDate = new Date(fromTime);
       let toDate = new Date(toTime);
-      let difference = toDate.getTime() - fromDate.getTime();
+      let difference = (toDate.getTime() - fromDate.getTime());
+      difference += (takeEndDate) ? oneDayTimeInSeconds:0;
+
       let timeDifference =
         difference / timeMeasurementMultiplier[timeMeasurement];
+  
       setDifferenceInTime(timeDifference);
-    } else {
-      setDifferenceInTime(fromTime ? fromTime : toTime ? toTime : "");
-    }
+    } 
   }
 
   function evaluateTheMesurement() {}
@@ -49,6 +56,8 @@ function App() {
           onChange={setTimeMeasurement}
         />
         <div>{differenceInTime}</div>
+        <Options setTakeEndDate={setTakeEndDate} />
+
         <div></div>
       </header>
     </div>
