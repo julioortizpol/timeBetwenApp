@@ -6,6 +6,7 @@ import arrowImage from "../Assets/arrow.png";
 import "./Options.css";
 import Image from "react-bootstrap/Image";
 import Form from 'react-bootstrap/Form'
+import DaysSelection from '../daysSelection'
 function Options(props) {
   const [isActive, setIsActive] = useState(false);
   const [endDateCheckSatete, setEndDateCheckSatete] = useState(false);
@@ -37,6 +38,7 @@ function Options(props) {
                         label="End Date Include"
                       />
                     </Form>
+                    <DaysSelection selectedDays = {props.selectedDays} setSelectedDays = {props.setSelectedDays}/>
                   </div>
                 )}
               </div>

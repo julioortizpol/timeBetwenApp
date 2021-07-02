@@ -9,6 +9,8 @@ function App() {
   const [differenceInTime, setDifferenceInTime] = useState();
   const [timeMeasurement, setTimeMeasurement] = useState("days");
   const [takeEndDate, setTakeEndDate] = useState(false);
+  //represent days of week being 0 Sun and 6 Sat
+  const [daysToCount, setDaysToCount] = useState([0, 1, 2, 3, 4, 5, 6]);
   const timeMeasurementMultiplier = {
     seconds: 1000 * 60,
     hours: 1000 * 60 * 60,
@@ -18,29 +20,56 @@ function App() {
     Years: 1000 * 60 * 60 * 24 * 365,
   };
 
-  const oneDayTimeInSeconds = 86400000;
+  function subtractDaysThatDontCount(dayIndex, days) {
+    let daysCounter = [0, 0, 0, 0, 0, 0, 0];
+    console.log(dayIndex);
+    for (let i = 0; i < days; i++) {
+      daysCounter[dayIndex] += 1;
+      dayIndex = dayIndex < 6 ? dayIndex + 1 : 0;
+    }
+    let daysCountFiltered = [];
+    console.log(daysCounter);
+    console.log(daysToCount);
+    daysToCount.forEach((dayIndex) =>
+      daysCountFiltered.push(daysCounter[dayIndex])
+    );
+
+    days = daysCountFiltered.reduce((a, b) => a + b, 0);
+    return days;
+  }
+
+  const oneDayTimeIMilinSeconds = 86400000;
   useEffect(() => {
-    getTimeDifference();
+    calculateTimeDifference();
   });
 
-  
-
-
-  function getTimeDifference() {
+  function calculateTimeDifference() {
     if (fromTime && toTime) {
       let fromDate = new Date(fromTime);
       let toDate = new Date(toTime);
-      let difference = (toDate.getTime() - fromDate.getTime());
-      difference += (takeEndDate) ? oneDayTimeInSeconds:0;
+      let difference = toDate.getTime() - fromDate.getTime();
+      difference += takeEndDate ? oneDayTimeIMilinSeconds : 0;
+      console.log(daysToCount.length);
+      let finalTimeDifference;
+      if (daysToCount.length != 7) {
+        let timeDifferenceInDays =
+          difference / timeMeasurementMultiplier["days"];
+        let timeWithOnlyCountDays = subtractDaysThatDontCount(
+          fromDate.getDay(),
+          timeDifferenceInDays
+        );
+        finalTimeDifference =
+          (timeWithOnlyCountDays * oneDayTimeIMilinSeconds) /
+          timeMeasurementMultiplier[timeMeasurement];
+      } else {
+        finalTimeDifference =
+          difference / timeMeasurementMultiplier[timeMeasurement];
+      }
+      setDifferenceInTime(finalTimeDifference);
 
-      let timeDifference =
-        difference / timeMeasurementMultiplier[timeMeasurement];
-  
-      setDifferenceInTime(timeDifference);
-    } 
+    }
   }
 
-  function evaluateTheMesurement() {}
 
   return (
     <div className="App">
@@ -56,7 +85,11 @@ function App() {
           onChange={setTimeMeasurement}
         />
         <div>{differenceInTime}</div>
-        <Options setTakeEndDate={setTakeEndDate} />
+        <Options
+          setTakeEndDate={setTakeEndDate}
+          selectedDays={daysToCount}
+          setSelectedDays={setDaysToCount}
+        />
 
         <div></div>
       </header>
