@@ -10,7 +10,7 @@ import DaysSelection from '../daysSelection'
 function Options(props) {
   const [isActive, setIsActive] = useState(false);
   const [endDateCheckSatete, setEndDateCheckSatete] = useState(false);
-
+  const [customTimeMeassurement, setCustomTimeMeassurement] = useState(false);
   return (
     <div>
       <Container>
@@ -36,6 +36,17 @@ function Options(props) {
                         type="checkbox"
                         id="checkbox01"
                         label="End Date Include"
+                      />
+                    </Form>
+                    <Form>
+                      <Form.Check
+                        onChange={() => {
+                          setCustomTimeMeassurement(!customTimeMeassurement);
+                          props.setCustomMessuaremetActive(!customTimeMeassurement);
+                        }}
+                        type="checkbox"
+                        id="checkbox02"
+                        label="Custom Time Mesurement"
                       />
                     </Form>
                     <DaysSelection selectedDays = {props.selectedDays} setSelectedDays = {props.setSelectedDays}/>

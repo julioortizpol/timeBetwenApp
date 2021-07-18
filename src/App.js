@@ -3,68 +3,53 @@ import "./App.css";
 import Timepicker from "./TimeField";
 import TimeMeasurementSelect from "./TimeMeasurementSelect";
 import Options from "./OptionsComponent/Options";
+import CustomTimeMeassurement from "./customMessurement"
+import utilities from './utilities'
+
 function App() {
   const [fromTime, setFromTime] = useState();
   const [toTime, setToTime] = useState();
   const [differenceInTime, setDifferenceInTime] = useState();
   const [timeMeasurement, setTimeMeasurement] = useState("days");
   const [takeEndDate, setTakeEndDate] = useState(false);
+  const [customMessuaremetActive, setCustomMessuaremetActive] = useState(false);
+  const [customUnitObject, setCustomUnitObject] = useState({value:0,unit:"Sample"});
+
   //represent days of week being 0 Sun and 6 Sat
   const [daysToCount, setDaysToCount] = useState([0, 1, 2, 3, 4, 5, 6]);
-  const timeMeasurementMultiplier = {
-    seconds: 1000 * 60,
-    hours: 1000 * 60 * 60,
-    days: 1000 * 60 * 60 * 24,
-    weeks: 1000 * 60 * 60 * 24 * 7,
-    months: 1000 * 60 * 60 * 24 * 30,
-    Years: 1000 * 60 * 60 * 24 * 365,
-  };
 
-  function subtractDaysThatDontCount(dayIndex, days) {
-    let daysCounter = [0, 0, 0, 0, 0, 0, 0];
-    console.log(dayIndex);
-    for (let i = 0; i < days; i++) {
-      daysCounter[dayIndex] += 1;
-      dayIndex = dayIndex < 6 ? dayIndex + 1 : 0;
-    }
-    let daysCountFiltered = [];
-    console.log(daysCounter);
-    console.log(daysToCount);
-    daysToCount.forEach((dayIndex) =>
-      daysCountFiltered.push(daysCounter[dayIndex])
-    );
 
-    days = daysCountFiltered.reduce((a, b) => a + b, 0);
-    return days;
-  }
-
-  const oneDayTimeIMilinSeconds = 86400000;
   useEffect(() => {
     calculateTimeDifference();
   });
 
+  
+
   function calculateTimeDifference() {
     if (fromTime && toTime) {
-      let fromDate = new Date(fromTime);
-      let toDate = new Date(toTime);
-      let difference = toDate.getTime() - fromDate.getTime();
-      difference += takeEndDate ? oneDayTimeIMilinSeconds : 0;
-      console.log(daysToCount.length);
+      let difference = utilities.getTimeDifferenceOfDateStringInMiliseconds({fromTime:fromTime,toTime:toTime, takeEndDate:takeEndDate}, utilities.oneDayTimeIMilinSeconds)
       let finalTimeDifference;
-      if (daysToCount.length != 7) {
-        let timeDifferenceInDays =
-          difference / timeMeasurementMultiplier["days"];
-        let timeWithOnlyCountDays = subtractDaysThatDontCount(
-          fromDate.getDay(),
-          timeDifferenceInDays
+
+      let timeDifferenceInDays =
+          difference / utilities.timeMeasurementMultiplier["days"];
+        let timeWithOnlyCountDays = utilities.subtractDaysThatDontCount(
+        (new Date(fromTime).getDay()),
+          timeDifferenceInDays,
+          daysToCount
         );
+      if (daysToCount.length !== 7) {
         finalTimeDifference =
-          (timeWithOnlyCountDays * oneDayTimeIMilinSeconds) /
-          timeMeasurementMultiplier[timeMeasurement];
+          (timeWithOnlyCountDays * utilities.oneDayTimeIMilinSeconds) /
+          utilities.timeMeasurementMultiplier[timeMeasurement];
       } else {
         finalTimeDifference =
-          difference / timeMeasurementMultiplier[timeMeasurement];
+          difference / utilities.timeMeasurementMultiplier[timeMeasurement];
       }
+
+      if(customMessuaremetActive){
+        finalTimeDifference = customUnitObject.value *timeWithOnlyCountDays;
+      }
+
       setDifferenceInTime(finalTimeDifference);
 
     }
@@ -79,19 +64,21 @@ function App() {
         <Timepicker value="From: " onChange={(time) => setFromTime(time)} />
 
         <Timepicker value="To: " onChange={(time) => setToTime(time)} />
-
+        {customMessuaremetActive ?
+        <CustomTimeMeassurement setcustomUnitObject = {setCustomUnitObject} customUnitObject = {customUnitObject}/>:
         <TimeMeasurementSelect
           value={timeMeasurement}
           onChange={setTimeMeasurement}
-        />
+        />}
+        
         <div>{differenceInTime}</div>
         <Options
           setTakeEndDate={setTakeEndDate}
           selectedDays={daysToCount}
           setSelectedDays={setDaysToCount}
+          setCustomMessuaremetActive = {setCustomMessuaremetActive}
         />
 
-        <div></div>
       </header>
     </div>
   );
